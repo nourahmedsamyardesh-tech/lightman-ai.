@@ -3,14 +3,13 @@ export default async function handler(req, res) {
     const { message } = req.body;
 
     try {
-      // هذا الرابط يربط بوتك بذكاء اصطناعي حقيقي ليرد على كل الأنميات وغيرها
-      const aiResponse = await fetch(`https://text.pollinations.ai/${encodeURIComponent(message)}?model=openai&system=أنت هو لايت مان، ذكاء اصطناعي خبير في كل الأنميات والقصص وتتحدث بلهجة مصرية ودودة`);
-      const responseText = await aiResponse.text();
+      // استخدام نموذج أسرع ومباشر للذكاء الاصطناعي
+      const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(message)}?model=openai&system=أنت هو لايت مان، ذكاء اصطناعي مصري عبقري، خبير في كل أنواع الأنمي والقصص. ردودك ذكية جداً، سريعة، ومختصرة ومفيدة. وتحدث بلهجة مصرية عامية ممتعة.`);
+      const text = await response.text();
 
-      return res.status(200).json({ reply: responseText });
+      return res.status(200).json({ reply: text });
     } catch (error) {
-      return res.status(200).json({ reply: "عذراً، عقلي مشغول قليلاً الآن، حاول مرة أخرى!" });
+      return res.status(500).json({ reply: "ثانية واحدة.. عقلي بيجمع المعلومات!" });
     }
   }
 }
-
