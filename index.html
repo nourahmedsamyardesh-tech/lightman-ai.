@@ -3,44 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Man AI</title>
+    <title>Light Man Pro</title>
     <style>
-        body { background: #004a99; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        body { background: #004a99; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; }
+        .header { text-align: center; color: white; padding: 10px; }
+        .header img { width: 60px; height: 60px; background: transparent; }
+
+        #chat-box { width: 95%; max-width: 500px; flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 80px; }
         
-        /* الصورة والاسم فوق الشات (شفافة وبدون خلفية) */
-        .header { text-align: center; padding: 10px; color: white; }
-        .header img { width: 80px; height: 80px; object-fit: contain; }
-
-        #chat-box { width: 95%; max-width: 500px; flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 70px; }
-
-        /* رسائل الشات - خلفية بيضاء وقلم أسود */
         .msg { padding: 12px; border-radius: 15px; max-width: 85%; color: black; font-weight: bold; font-size: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .bot-msg { background: #ffffff; align-self: flex-start; }
         .user-msg { background: #e0e0e0; align-self: flex-end; }
 
-        /* منطقة الكتابة */
-        .input-area { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: white; padding: 15px; display: flex; gap: 10px; box-sizing: border-box; }
+        .input-area { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: white; padding: 15px; display: flex; gap: 10px; align-items: center; box-sizing: border-box; }
+        .plus-btn { background: #eee; border: none; border-radius: 50%; width: 40px; height: 40px; font-size: 24px; cursor: pointer; color: #004a99; font-weight: bold; }
         input { flex: 1; border: 1px solid #ccc; border-radius: 20px; padding: 10px 15px; outline: none; color: black; }
-        button { background: #004a99; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+        
+        /* قائمة الخيارات */
+        .menu { display: none; position: fixed; bottom: 70px; right: 20px; background: white; border-radius: 15px; box-shadow: 0 -2px 10px rgba(0,0,0,0.2); padding: 10px; flex-direction: column; gap: 10px; z-index: 100; }
+        .menu button { background: #004a99; color: white; border: none; padding: 10px; border-radius: 10px; cursor: pointer; text-align: right; }
 
-        /* عرض الميديا (صور وفيديوهات) */
         .media-res { width: 100%; border-radius: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
     <div class="header">
-        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=LightMan" alt="Face">
+        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=LightMan" alt="LightMan">
         <div>Light Man AI</div>
     </div>
 
     <div id="chat-box"></div>
 
+    <div class="menu" id="plus-menu">
+        <button onclick="quickAction('ارسم صورة لـ ')">🖼️ طلب صورة أنمي</button>
+        <button onclick="quickAction('ابحث عن فيديو لـ ')">🎥 بحث عن فيديوهات</button>
+    </div>
+
     <div class="input-area">
+        <button class="plus-btn" onclick="toggleMenu()">+</button>
         <input type="text" id="user-input" placeholder="اكتب سؤالك هنا...">
-        <button onclick="send()">إرسال</button>
+        <button onclick="send()" style="background: #004a99; color: white; border: none; border-radius: 20px; padding: 10px 20px;">إرسال</button>
     </div>
 
     <script>
+        function toggleMenu() {
+            const menu = document.getElementById('plus-menu');
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function quickAction(prefix) {
+            document.getElementById('user-input').value = prefix;
+            toggleMenu();
+            document.getElementById('user-input').focus();
+        }
+
         async function send() {
             const input = document.getElementById('user-input');
             const box = document.getElementById('chat-box');
@@ -61,19 +77,18 @@
             let content = data.reply;
             let media = '';
 
-            // لو في صورة
             if (content.includes("IMAGE_URL:")) {
                 const parts = content.split("IMAGE_URL:");
-                const url = parts[1].trim();
-                media = `<img src="${url}" class="media-res">`;
+                media = `<img src="${parts[1].trim()}" class="media-res">`;
                 content = parts[0];
             }
-
-            // لو في فيديو يوتيوب
-            const ytMatch = content.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=)?(.+)/);
-            if (ytMatch) {
-                const vidId = ytMatch[1].split(/[?& ]/)[0];
-                media += `<iframe class="media-res" height="200" src="https://www.youtube.com/embed/${vidId}" frameborder="0" allowfullscreen></iframe>`;
+            
+            if (content.includes("VIDEO_URL:")) {
+                const parts = content.split("VIDEO_URL:");
+                const vidUrl = parts[1].trim();
+                const vidId = vidUrl.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/)[1];
+                media = `<iframe class="media-res" height="200" src="https://www.youtube.com/embed/${vidId}" frameborder="0" allowfullscreen></iframe>`;
+                content = parts[0];
             }
 
             box.innerHTML += `<div class="msg bot-msg">${content} ${media}</div>`;
