@@ -4,107 +4,118 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Light Man AI</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/generative-ai": "https://esm.run/@google/generative-ai"
+        }
+      }
+    </script>
     <style>
-        /* ضبط الخلفية الزرقاء بالظبط */
+        /* الخلفية الزرقاء المطابقة للصورة */
         body { 
             background-color: #004a99; 
             margin: 0; 
-            font-family: 'Segoe UI', sans-serif; 
+            font-family: 'Arial', sans-serif; 
             display: flex; 
             flex-direction: column; 
             height: 100vh;
             align-items: center;
         }
 
-        /* الهيدر العلوي */
+        /* الجزء العلوي: اللوجو والاسم */
         .header {
             text-align: center;
             padding: 20px 0;
-            color: white;
+            width: 100%;
         }
-        /* اللوجو العقل المضيء */
         .header img {
-            width: 110px;
+            width: 120px; /* حجم اللوجو في الصورة */
             height: auto;
-            margin-bottom: 5px;
+            filter: drop-shadow(0 0 10px rgba(0,255,255,0.5));
         }
         .header h1 {
-            font-size: 38px;
-            margin: 0;
+            color: white;
+            font-size: 40px;
+            margin: 10px 0;
             font-weight: bold;
         }
 
-        /* المربع الأبيض - منطقة الشات */
-        .chat-container {
+        /* المربع الأبيض للمحادثة */
+        .chat-card {
             background-color: white;
-            width: 92%;
+            width: 90%;
             max-width: 450px;
             flex: 1;
-            margin: 10px 0 20px 0;
+            margin-bottom: 20px;
             border-radius: 8px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid #ddd;
         }
 
         #chat-box {
             flex: 1;
-            padding: 15px;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            gap: 15px;
         }
 
-        /* شكل الرسائل في الصورة */
-        .msg { font-size: 19px; color: black; margin-bottom: 15px; line-height: 1.4; position: relative; padding-right: 40px; }
-        
-        /* أيقونة اللوجو الصغير جنب الرسائل */
-        .msg::before {
-            content: "";
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 30px;
-            height: 30px;
-            background: url('https://api.dicebear.com/7.x/bottts-neutral/svg?seed=LightMan') no-repeat center;
-            background-size: contain;
+        /* تصميم الرسائل مع الأيقونة الصغيرة */
+        .message-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            flex-direction: row-reverse; /* ترتيب أيقونة يمين */
+        }
+        .avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+        }
+        .text {
+            font-size: 20px;
+            color: black;
+            line-height: 1.4;
+            max-width: 80%;
         }
 
-        .user-msg { color: #333; font-weight: normal; }
-        .bot-msg { font-weight: bold; }
-
-        /* شريط الإدخال السفلي */
-        .input-bar {
+        /* شريط الإدخال السفلي باللون الأزرق */
+        .input-footer {
+            background: white;
+            padding: 10px;
             border-top: 2px solid #004a99;
-            padding: 12px;
+            display: flex;
+            justify-content: center;
+        }
+        .input-container {
+            width: 95%;
             display: flex;
             align-items: center;
             gap: 10px;
-            background: white;
         }
-
         .send-btn {
             background-color: #004a99;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 8px 20px;
+            border-radius: 20px;
             cursor: pointer;
-            font-weight: bold;
             font-size: 16px;
+            font-weight: bold;
         }
-
         input {
             flex: 1;
-            border: 1px solid #ddd;
+            border: 1px solid #ccc;
             border-radius: 25px;
-            padding: 12px 15px;
+            padding: 10px 15px;
             outline: none;
             text-align: right;
             font-size: 16px;
         }
-
         .plus-btn {
             background-color: #004a99;
             color: white;
@@ -112,7 +123,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            font-size: 25px;
+            font-size: 24px;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -123,67 +134,76 @@
 <body>
 
 <div class="header">
-    <img src="https://api.dicebear.com/7.x/identicon/svg?seed=lightman&backgroundColor=b6e3f4" alt="Light Man Logo">
+    <img src="https://i.ibb.co/m0fH8Kx/light-man-logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2103/2103633.png'" alt="Logo">
     <h1>light man AI</h1>
 </div>
 
-<div class="chat-container">
+<div class="chat-card">
     <div id="chat-box">
-        <div class="msg bot-msg">أهلاً بك انا الذكاء الاصطناعي لك إسمي light man Ai</div>
+        <div class="message-row">
+            <img class="avatar" src="https://i.ibb.co/m0fH8Kx/light-man-logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2103/2103633.png'">
+            <div class="text">أهلاً بك انا الذكاء الاصطناعي لك إسمي light man Ai</div>
+        </div>
     </div>
     
-    <div class="input-bar">
-        <button class="send-btn" onclick="callGemini()">إرسال</button>
-        <input type="text" id="user-input" placeholder="اكتب سؤالك هنا...">
-        <button class="plus-btn">+</button>
+    <div class="input-footer">
+        <div class="input-container">
+            <button class="send-btn" id="sendBtn">إرسال</button>
+            <input type="text" id="userInput" placeholder="اكتب سؤالك هنا...">
+            <button class="plus-btn">+</button>
+        </div>
     </div>
 </div>
 
-<script>
-    // مفتاحك اللي بعتهولي
+<script type="module">
+    import { GoogleGenerativeAI } from "@google/generative-ai";
+
+    // مفتاحك الذي زودتني به
     const API_KEY = "AIzaSyC6iJNfC4jgA44ohT8LyZy2j2zsuC8Qkf8";
+    const genAI = new GoogleGenerativeAI(API_KEY);
+    // نستخدم gemini-1.5-flash لضمان السرعة والتوافق
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-    async function callGemini() {
-        const input = document.getElementById('user-input');
-        const box = document.getElementById('chat-box');
-        const userText = input.value.trim();
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
 
-        if (!userText) return;
+    async function startChat() {
+        const text = userInput.value.trim();
+        if (!text) return;
 
-        // إضافة رسالة المستخدم
-        box.innerHTML += `<div class="msg user-msg">${userText}</div>`;
-        input.value = '';
-        box.scrollTop = box.scrollHeight;
+        // إظهار رسالة المستخدم
+        appendMessage(text, 'user');
+        userInput.value = '';
 
         try {
-            // المحاولة باستخدام موديل pro لأنه أكثر استقراراً في الويب المباشر
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: userText }] }]
-                })
-            });
-
-            const result = await response.json();
-
-            // التحقق من وصول الرد بشكل سليم
-            if (result.candidates && result.candidates[0].content) {
-                const aiText = result.candidates[0].content.parts[0].text;
-                box.innerHTML += `<div class="msg bot-msg">${aiText}</div>`;
-            } else {
-                box.innerHTML += `<div class="msg bot-msg">عذراً، الـ API فيه مشكلة في الصلاحيات.</div>`;
-            }
-        } catch (e) {
-            box.innerHTML += `<div class="msg bot-msg">خطأ في الاتصال، جرب مرة تانية.</div>`;
+            const result = await model.generateContent(text);
+            const response = await result.response;
+            const aiReply = response.text();
+            appendMessage(aiReply, 'bot');
+        } catch (error) {
+            console.error(error);
+            appendMessage("عذراً، تأكد من تفعيل الموديل في إعدادات Google Cloud.", 'bot');
         }
-        box.scrollTop = box.scrollHeight;
     }
 
-    // دعم زر الانتر
-    document.getElementById('user-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') callGemini();
-    });
+    function appendMessage(text, sender) {
+        const row = document.createElement('div');
+        row.className = 'message-row';
+        if (sender === 'user') row.style.flexDirection = 'row'; // المستخدم أيقونة يسار
+
+        const icon = sender === 'bot' ? 'https://i.ibb.co/m0fH8Kx/light-man-logo.png' : 'https://api.dicebear.com/7.x/avataaars/svg?seed=User';
+        
+        row.innerHTML = `
+            <img class="avatar" src="${icon}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2103/2103633.png'">
+            <div class="text">${text}</div>
+        `;
+        chatBox.appendChild(row);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendBtn.onclick = startChat;
+    userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') startChat(); });
 </script>
 
 </body>
