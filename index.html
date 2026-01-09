@@ -3,80 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Man Ultra</title>
+    <title>Light Man AI</title>
     <style>
-        body { background: #eef2f3; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .bot-msg { background: #fff; padding: 15px; border-radius: 18px 18px 18px 2px; align-self: flex-start; max-width: 85%; box-shadow: 0 4px 6px rgba(0,0,0,0.05); color: #222; }
-        .user-msg { background: #007bff; color: #fff; padding: 15px; border-radius: 18px 18px 2px 18px; align-self: flex-end; max-width: 85%; }
-        .controls { background: #fff; padding: 15px; border-top: 1px solid #ddd; }
-        .input-row { display: flex; gap: 10px; align-items: center; }
-        select { padding: 8px; border-radius: 10px; border: 1px solid #ddd; background: #f9f9f9; font-size: 12px; margin-bottom: 10px; width: 100%; }
-        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 20px; outline: none; }
-        button { border: none; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
-        .call-btn { width: 50px; height: 50px; border-radius: 50%; background: #28a745; color: white; font-size: 24px; }
-        .send-btn { background: #007bff; color: white; border-radius: 25px; padding: 0 20px; height: 45px; }
-        img { width: 100%; border-radius: 12px; margin-top: 10px; }
+        /* خلفية الشات الزرقاء */
+        body { background: #004a99; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; align-items: center; }
+        
+        /* الصورة فوق الشات */
+        .header-img { width: 100px; height: 100px; border-radius: 50%; margin: 20px 0; border: 3px solid white; }
+
+        .chat-container { width: 95%; max-width: 500px; flex: 1; display: flex; flex-direction: column; background: transparent; }
+        
+        #chat-box { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+
+        /* خلفية الكتابة بيضاء والخط أسود */
+        .bot-msg, .user-msg { 
+            padding: 12px; 
+            border-radius: 15px; 
+            max-width: 85%; 
+            color: black; /* خط القلم أسود للطرفين */
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .bot-msg { background: #ffffff; align-self: flex-start; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .user-msg { background: #e0e0e0; align-self: flex-end; }
+
+        .controls { background: white; padding: 15px; width: 100%; display: flex; gap: 10px; box-sizing: border-box; }
+        input { flex: 1; border: 1px solid #ccc; border-radius: 25px; padding: 12px; outline: none; color: black; }
+        button { background: #004a99; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; }
+        
+        img.generated-img { width: 100%; border-radius: 10px; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div id="chat-box"></div>
-    <div class="controls">
-        <select id="voice-select"><option value="">جاري تحميل الأصوات...</option></select>
-        
-        <div class="input-row">
-            <input type="text" id="user-input" placeholder="تحدث مع لايت مان...">
-            <button class="call-btn" id="call-btn" onclick="toggleCall()">📞</button>
-            <button class="send-btn" onclick="send()">إرسال</button>
+    <img src="https://via.placeholder.com/100" class="header-img" alt="Light Man">
+
+    <div class="chat-container">
+        <div id="chat-box">
+            <div class="bot-msg">أهلاً بك! أنا لايت مان، نسختي الجديدة أذكى وبدون صوت مزعج. اطلب مني أي صورة أو معلومة.</div>
+        </div>
+        <div class="controls">
+            <input type="text" id="user-input" placeholder="اكتب رسالتك هنا...">
+            <button onclick="send()">إرسال</button>
         </div>
     </div>
 
     <script>
         const box = document.getElementById('chat-box');
         const input = document.getElementById('user-input');
-        const voiceSelect = document.getElementById('voice-select');
-        let isCalling = false;
-        let voices = [];
-
-        // تحميل الأصوات المتاحة في جهازك (موبايل أو كمبيوتر)
-        function loadVoices() {
-            voices = window.speechSynthesis.getVoices();
-            voiceSelect.innerHTML = voices
-                .filter(v => v.lang.includes('ar') || v.lang.includes('en'))
-                .map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
-        }
-        window.speechSynthesis.onvoiceschanged = loadVoices;
-
-        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-        recognition.lang = 'ar-SA';
-        recognition.continuous = true;
-
-        function toggleCall() {
-            if (!isCalling) {
-                recognition.start();
-                document.getElementById('call-btn').style.background = 'red';
-                document.getElementById('call-btn').innerText = '⏹';
-                isCalling = true;
-            } else {
-                recognition.stop();
-                document.getElementById('call-btn').style.background = '#28a745';
-                document.getElementById('call-btn').innerText = '📞';
-                isCalling = false;
-            }
-        }
-
-        recognition.onresult = (event) => {
-            const text = event.results[event.results.length - 1][0].transcript;
-            input.value = text;
-            send();
-        };
 
         async function send() {
             const msg = input.value.trim();
             if (!msg) return;
+
             box.innerHTML += `<div class="user-msg">${msg}</div>`;
             input.value = '';
-            
+            box.scrollTop = box.scrollHeight;
+
             const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -84,23 +67,17 @@
             });
             const data = await response.json();
             
-            let htmlReply = `<div class="bot-msg">`;
+            let replyHtml = `<div class="bot-msg">`;
             if (data.reply.includes("IMAGE_URL:")) {
                 const parts = data.reply.split("IMAGE_URL:");
-                htmlReply += `<img src="${parts[1].trim()}"><br>` + parts[0];
+                replyHtml += `<img src="${parts[1].trim()}" class="generated-img"><br>` + parts[0];
             } else {
-                htmlReply += data.reply;
+                replyHtml += data.reply;
             }
-            htmlReply += `</div>`;
-            box.innerHTML += htmlReply;
-            box.scrollTop = box.scrollHeight;
+            replyHtml += `</div>`;
 
-            // نطق الرد بالصوت المختار
-            const utterance = new SpeechSynthesisUtterance(data.reply.split("IMAGE_URL:")[0]);
-            if (voices[voiceSelect.value]) utterance.voice = voices[voiceSelect.value];
-            utterance.lang = 'ar-SA';
-            utterance.rate = 0.9; // سرعة هادئة وطبيعية
-            window.speechSynthesis.speak(utterance);
+            box.innerHTML += replyHtml;
+            box.scrollTop = box.scrollHeight;
         }
     </script>
 </body>
