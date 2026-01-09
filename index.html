@@ -6,44 +6,48 @@
     <title>Light Man AI</title>
     <style>
         body { background-color: #001f3f; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .chat-container { width: 90%; max-width: 500px; background: #003366; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        #chat-box { height: 300px; overflow-y: auto; margin-bottom: 10px; padding: 10px; background: #00264d; border-radius: 10px; border: 1px solid #007bff; }
-        .input-group { display: flex; gap: 5px; }
-        input { flex: 1; padding: 12px; border-radius: 5px; border: none; outline: none; color: black; }
+        .chat-container { width: 95%; max-width: 500px; background: #003366; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        #chat-box { height: 350px; overflow-y: auto; margin-bottom: 10px; padding: 10px; background: #00264d; border-radius: 10px; border: 1px solid #007bff; }
+        .input-group { display: flex; gap: 8px; }
+        input { flex: 1; padding: 12px; border-radius: 5px; border: none; outline: none; font-size: 16px; }
         button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <h1 style="text-align: center; color: #007bff;">Light Man AI</h1>
-        <div id="chat-box">مرحباً! أنا لايت مان، جرب كتابة أي شيء الآن وسأرد عليك.</div>
+        <h1 style="text-align: center;">Light Man AI</h1>
+        <div id="chat-box">السيرفر متصل الآن.. جرب مراسلتي!</div>
         <div class="input-group">
             <input type="text" id="user-input" placeholder="اكتب رسالتك هنا...">
-            <button onclick="sendMsg()">إرسال</button>
+            <button id="btn">إرسال</button>
         </div>
     </div>
+
     <script>
-        async function sendMsg() {
+        document.getElementById('btn').addEventListener('click', async () => {
             const input = document.getElementById('user-input');
             const box = document.getElementById('chat-box');
-            const text = input.value.trim();
-            if (!text) return;
-            box.innerHTML += `<div><strong>أنت:</strong> ${text}</div>`;
-            input.value = '';
-            box.scrollTop = box.scrollHeight;
-            try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
-                });
-                const data = await response.json();
-                box.innerHTML += `<div style="color: #00ff00;"><strong>Light Man:</strong> ${data.reply}</div>`;
-            } catch (error) {
-                box.innerHTML += `<div style="color: red;">خطأ: تأكد من ملف api/chat.js</div>`;
+            const msg = input.value.trim();
+
+            if (msg) {
+                box.innerHTML += `<div style="margin: 5px 0;"><strong>أنت:</strong> ${msg}</div>`;
+                input.value = '';
+                
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ message: msg })
+                    });
+                    
+                    const data = await response.json();
+                    box.innerHTML += `<div style="color: #00ff00; margin: 5px 0;"><strong>Light Man:</strong> ${data.reply}</div>`;
+                } catch (error) {
+                    box.innerHTML += `<div style="color: red;">عذراً، حدث خطأ في الاتصال بالسيرفر.</div>`;
+                }
+                box.scrollTop = box.scrollHeight;
             }
-            box.scrollTop = box.scrollHeight;
-        }
+        });
     </script>
 </body>
 </html>
