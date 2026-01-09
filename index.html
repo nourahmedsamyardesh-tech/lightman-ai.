@@ -3,92 +3,116 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Man Ultra</title>
+    <title>Light Man AI Pro</title>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
     <style>
-        body { background: #004a99; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; }
-        .header { text-align: center; padding: 15px; color: white; background: rgba(0,0,0,0.1); width: 100%; }
-        .header img { width: 70px; height: 70px; background: none; } /* الصورة بدون خلفية */
+        :root { --main-blue: #003366; --chat-bg: #004a99; --text-color: #000000; }
+        body { background: var(--chat-bg); font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        #chat-box { width: 95%; max-width: 500px; flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 80px; }
-        
-        .msg { padding: 12px; border-radius: 15px; max-width: 85%; color: black; font-weight: bold; }
-        .bot-msg { background: white; align-self: flex-start; }
-        .user-msg { background: #e0e0e0; align-self: flex-end; }
+        /* الهيدر الاحترافي (نفس شكل الصورة) */
+        .app-header { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); width: 100%; padding: 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.2); box-sizing: border-box; }
+        .user-info { display: flex; align-items: center; gap: 10px; color: white; }
+        .user-info img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #fff; }
+        .login-btn { background: white; color: var(--main-blue); border: none; padding: 8px 15px; border-radius: 20px; font-weight: bold; cursor: pointer; }
 
-        .input-area { position: fixed; bottom: 0; width: 100%; max-width: 500px; background: white; padding: 10px; display: flex; gap: 8px; align-items: center; box-sizing: border-box; }
-        .plus-btn { background: #004a99; color: white; border: none; border-radius: 50%; width: 35px; height: 35px; font-size: 20px; cursor: pointer; }
-        input { flex: 1; border: 1px solid #ccc; border-radius: 20px; padding: 10px 15px; outline: none; }
-        
-        .menu { display: none; position: fixed; bottom: 65px; left: 20px; background: white; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); flex-direction: column; z-index: 100; }
-        .menu button { background: none; border: none; padding: 10px 20px; border-bottom: 1px solid #eee; cursor: pointer; text-align: right; color: #004a99; font-weight: bold; }
+        /* منطقة الشات */
+        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .msg { padding: 15px; border-radius: 20px; max-width: 80%; font-weight: 500; font-size: 16px; line-height: 1.5; color: var(--text-color); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .bot-msg { background: #ffffff; align-self: flex-start; border-bottom-right-radius: 2px; }
+        .user-msg { background: #e3f2fd; align-self: flex-end; border-bottom-left-radius: 2px; }
 
-        img.media-res, iframe.media-res { width: 100%; border-radius: 10px; margin-top: 10px; border: none; }
+        /* منطقة الإدخال المطورة */
+        .input-container { background: white; padding: 15px; display: flex; align-items: center; gap: 10px; border-radius: 30px 30px 0 0; }
+        .action-btn { background: #f0f0f0; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 20px; transition: 0.3s; color: var(--main-blue); }
+        .action-btn:hover { background: #e0e0e0; }
+        input[type="text"] { flex: 1; border: none; padding: 12px; outline: none; font-size: 16px; color: black; }
+        .send-btn { background: var(--main-blue); color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+
+        /* الميديا */
+        .media-content { width: 100%; border-radius: 15px; margin-top: 10px; border: 2px solid #fff; }
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="https://api.dicebear.com/7.x/bottts/svg?seed=LightMan&backgroundColor=transparent" alt="Light Man Face">
-        <div style="font-weight: bold; margin-top: 5px;">Light Man AI</div>
+
+    <header class="app-header">
+        <div class="user-info" id="user-display">
+            <img src="https://api.dicebear.com/7.x/bottts/svg?seed=LightMan" alt="Bot">
+            <div>
+                <strong style="display: block;">Light Man AI</strong>
+                <small id="auth-status">سجل دخولك يا بطل</small>
+            </div>
+        </div>
+        <button class="login-btn" id="login-google">تسجيل دخول بجوجل</button>
+    </header>
+
+    <div id="chat-box">
+        <div class="msg bot-msg">مرحباً بك في النسخة الاحترافية من لايت مان! أنا الآن أذكى، أسرع، وأدعم الصور والفيديوهات.</div>
     </div>
 
-    <div id="chat-box"></div>
+    <input type="file" id="file-input" style="display: none;" accept="image/*,video/*">
 
-    <div class="menu" id="plus-menu">
-        <button onclick="quickAction('ارسم صورة لـ ')">🖼️ صور</button>
-        <button onclick="quickAction('فيديو لـ ')">🎥 فيديوهات</button>
-    </div>
-
-    <div class="input-area">
-        <button class="plus-btn" onclick="toggleMenu()">+</button>
-        <input type="text" id="user-input" placeholder="اكتب سؤالك هنا...">
-        <button onclick="send()" style="background:#004a99; color:white; border:none; border-radius:20px; padding: 8px 15px;">إرسال</button>
+    <div class="input-container">
+        <button class="action-btn" onclick="document.getElementById('file-input').click()">➕</button>
+        <input type="text" id="user-input" placeholder="اسألني أي شيء عن الأنمي...">
+        <button class="send-btn" onclick="handleSend()">إرسال</button>
     </div>
 
     <script>
-        function toggleMenu() {
-            const m = document.getElementById('plus-menu');
-            m.style.display = m.style.display === 'flex' ? 'none' : 'flex';
-        }
-        function quickAction(p) { document.getElementById('user-input').value = p; toggleMenu(); }
+        // --- إعدادات Firebase (ضع إعدادات مشروعك هنا) ---
+        const firebaseConfig = { apiKey: "YOUR_API_KEY", authDomain: "YOUR_PROJECT.firebaseapp.com" };
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
 
-        async function send() {
+        // تسجيل الدخول بجوجل
+        document.getElementById('login-google').onclick = () => {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).then(res => {
+                const user = res.user;
+                document.getElementById('user-display').querySelector('img').src = user.photoURL;
+                document.getElementById('auth-status').innerText = user.displayName;
+                document.getElementById('login-google').style.display = 'none';
+            });
+        };
+
+        // إرسال الرسائل
+        async function handleSend() {
             const input = document.getElementById('user-input');
             const box = document.getElementById('chat-box');
-            const val = input.value.trim();
-            if (!val) return;
+            if (!input.value.trim()) return;
 
-            box.innerHTML += `<div class="msg user-msg">${val}</div>`;
+            const userVal = input.value;
+            box.innerHTML += `<div class="msg user-msg">${userVal}</div>`;
             input.value = '';
             box.scrollTop = box.scrollHeight;
 
-            const res = await fetch('/api/chat', {
+            const response = await fetch('/api/chat', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ message: val })
+                body: JSON.stringify({ message: userVal })
             });
-            const data = await res.json();
+            const data = await response.json();
             
-            let content = data.reply;
-            let media = '';
-
-            if (content.includes("IMAGE_URL:")) {
-                const parts = content.split("IMAGE_URL:");
-                const url = parts[1].trim().split(" ")[0];
-                media = `<img src="${url}" class="media-res">`;
-                content = parts[0];
+            let replyHtml = `<div class="msg bot-msg">${data.reply}`;
+            if (data.media) {
+                if (data.mediaType === 'image') replyHtml += `<img src="${data.media}" class="media-content">`;
+                if (data.mediaType === 'video') replyHtml += `<iframe src="${data.media}" class="media-content" height="250"></iframe>`;
             }
+            replyHtml += `</div>`;
             
-            if (content.includes("VIDEO_URL:")) {
-                const parts = content.split("VIDEO_URL:");
-                const vidUrl = parts[1].trim();
-                const vidId = vidUrl.match(/(?:v=|\/)([0-9A-Za-z_-]{11})/)[1];
-                media = `<iframe class="media-res" height="200" src="https://www.youtube.com/embed/${vidId}" frameborder="0" allowfullscreen></iframe>`;
-                content = parts[0];
-            }
-
-            box.innerHTML += `<div class="msg bot-msg">${content} ${media}</div>`;
+            box.innerHTML += replyHtml;
             box.scrollTop = box.scrollHeight;
         }
+
+        // معالجة رفع الملفات (صور/فيديو)
+        document.getElementById('file-input').onchange = function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const box = document.getElementById('chat-box');
+                box.innerHTML += `<div class="msg user-msg">طلب تحليل ملف: ${file.name}</div>`;
+                // هنا يتم إرسال الملف للسيرفر (تحتاج إضافة كود Upload في api/chat.js)
+            }
+        };
     </script>
 </body>
 </html>
