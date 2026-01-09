@@ -5,48 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Light Man AI</title>
     <style>
-        body { background-color: #001f3f; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .chat-container { width: 95%; max-width: 500px; background: #003366; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        #chat-box { height: 350px; overflow-y: auto; margin-bottom: 10px; padding: 10px; background: #00264d; border-radius: 10px; border: 1px solid #007bff; }
-        .input-group { display: flex; gap: 8px; }
-        input { flex: 1; padding: 12px; border-radius: 5px; border: none; outline: none; font-size: 16px; }
-        button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        body { background-color: #f0f2f5; color: #333; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .chat-container { width: 95%; max-width: 500px; background: #fff; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        #chat-box { height: 400px; overflow-y: auto; margin-bottom: 15px; padding: 15px; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 15px; display: flex; flex-direction: column; }
+        .input-group { display: flex; gap: 10px; }
+        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; background: #f9f9f9; }
+        button { background: #007bff; color: white; border: none; padding: 10px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        button:hover { background: #0056b3; }
+        .bot-msg { color: #1a1a1a; background: #e7f3ff; padding: 10px 15px; border-radius: 15px; align-self: flex-start; margin: 5px 0; max-width: 80%; }
+        .user-msg { color: #fff; background: #007bff; padding: 10px 15px; border-radius: 15px; align-self: flex-end; margin: 5px 0; max-width: 80%; }
     </style>
 </head>
 <body>
     <div class="chat-container">
-        <h1 style="text-align: center;">Light Man AI</h1>
-        <div id="chat-box">السيرفر متصل الآن.. جرب مراسلتي!</div>
+        <h2 style="text-align: center; color: #007bff; margin-top: 0;">Light Man AI</h2>
+        <div id="chat-box"><div class="bot-msg">أهلاً بك! أنا لايت مان، اسألني عن أي أنمي أو قصة وسأرد فوراً.</div></div>
         <div class="input-group">
-            <input type="text" id="user-input" placeholder="اكتب رسالتك هنا...">
-            <button id="btn">إرسال</button>
+            <input type="text" id="user-input" placeholder="اكتب سؤالك هنا...">
+            <button id="send-btn">إرسال</button>
         </div>
     </div>
-
     <script>
-        document.getElementById('btn').addEventListener('click', async () => {
+        document.getElementById('send-btn').addEventListener('click', async () => {
             const input = document.getElementById('user-input');
             const box = document.getElementById('chat-box');
-            const msg = input.value.trim();
+            const text = input.value.trim();
+            if (!text) return;
 
-            if (msg) {
-                box.innerHTML += `<div style="margin: 5px 0;"><strong>أنت:</strong> ${msg}</div>`;
-                input.value = '';
-                
-                try {
-                    const response = await fetch('/api/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: msg })
-                    });
-                    
-                    const data = await response.json();
-                    box.innerHTML += `<div style="color: #00ff00; margin: 5px 0;"><strong>Light Man:</strong> ${data.reply}</div>`;
-                } catch (error) {
-                    box.innerHTML += `<div style="color: red;">عذراً، حدث خطأ في الاتصال بالسيرفر.</div>`;
-                }
-                box.scrollTop = box.scrollHeight;
+            box.innerHTML += `<div class="user-msg">${text}</div>`;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await response.json();
+                box.innerHTML += `<div class="bot-msg">${data.reply}</div>`;
+            } catch (e) {
+                box.innerHTML += `<div class="bot-msg" style="color:red;">عذراً، حصل خطأ بسيط!</div>`;
             }
+            box.scrollTop = box.scrollHeight;
         });
     </script>
 </body>
