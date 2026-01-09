@@ -3,20 +3,15 @@ async function sendMessage() {
     const box = document.getElementById('chat-box');
     const text = input.value;
     if(text) {
-        box.innerHTML += "<div>أنت: " + text + "</div>";
-        box.innerHTML += "<div>Light Man: جاري التفكير...</div>";
+        box.innerHTML += `<div style="margin:10px; color:#007bff;">أنت: ${text}</div>`;
         input.value = '';
         
-        try {
-            const response = await fetch('/api/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
-            });
-            const data = await response.json();
-            box.innerHTML += "<div>Light Man: " + data.reply + "</div>";
-        } catch (error) {
-            box.innerHTML += "<div>خطأ: تأكد من إعداد ملف api/chat.js</div>";
-        }
+        const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text })
+        });
+        const data = await response.json();
+        box.innerHTML += `<div style="margin:10px; color:#00ff00;">Light Man: ${data.reply}</div>`;
     }
 }
