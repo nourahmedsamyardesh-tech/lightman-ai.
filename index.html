@@ -9,49 +9,41 @@
         .chat-container { width: 90%; max-width: 500px; background: #003366; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         #chat-box { height: 300px; overflow-y: auto; margin-bottom: 10px; padding: 10px; background: #00264d; border-radius: 10px; border: 1px solid #007bff; }
         .input-group { display: flex; gap: 5px; }
-        input { flex: 1; padding: 12px; border-radius: 5px; border: none; outline: none; }
+        input { flex: 1; padding: 12px; border-radius: 5px; border: none; outline: none; color: black; }
         button { background: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        button:active { background: #0056b3; }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <h1 style="text-align: center; color: #007bff;">Light Man AI</h1>
-        <div id="chat-box">أهلاً بك! أنا لايت مان، جرب مراسلتي الآن.</div>
+        <div id="chat-box">مرحباً! أنا لايت مان، جرب كتابة أي شيء الآن وسأرد عليك.</div>
         <div class="input-group">
             <input type="text" id="user-input" placeholder="اكتب رسالتك هنا...">
-            <button id="send-btn">إرسال</button>
+            <button onclick="sendMsg()">إرسال</button>
         </div>
     </div>
-
     <script>
-        document.getElementById('send-btn').addEventListener('click', async () => {
+        async function sendMsg() {
             const input = document.getElementById('user-input');
             const box = document.getElementById('chat-box');
             const text = input.value.trim();
-
-            if (text) {
-                box.innerHTML += `<div style="margin: 10px 0;"><strong>أنت:</strong> ${text}</div>`;
-                input.value = '';
-                box.innerHTML += `<div id="loading" style="color: #aaa;">جاري التفكير...</div>`;
-                box.scrollTop = box.scrollHeight;
-
-                try {
-                    const response = await fetch('/api/chat', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ message: text })
-                    });
-                    const data = await response.json();
-                    document.getElementById('loading').remove();
-                    box.innerHTML += `<div style="margin: 10px 0; color: #00ff00;"><strong>Light Man:</strong> ${data.reply}</div>`;
-                } catch (error) {
-                    document.getElementById('loading').remove();
-                    box.innerHTML += `<div style="color: red;">خطأ: تأكد من ملف api/chat.js</div>`;
-                }
-                box.scrollTop = box.scrollHeight;
+            if (!text) return;
+            box.innerHTML += `<div><strong>أنت:</strong> ${text}</div>`;
+            input.value = '';
+            box.scrollTop = box.scrollHeight;
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                const data = await response.json();
+                box.innerHTML += `<div style="color: #00ff00;"><strong>Light Man:</strong> ${data.reply}</div>`;
+            } catch (error) {
+                box.innerHTML += `<div style="color: red;">خطأ: تأكد من ملف api/chat.js</div>`;
             }
-        });
+            box.scrollTop = box.scrollHeight;
+        }
     </script>
 </body>
 </html>
