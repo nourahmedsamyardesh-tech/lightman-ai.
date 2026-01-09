@@ -3,77 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Light Man AI - Voice</title>
+    <title>Light Man Ultra</title>
     <style>
-        body { background-color: #f0f2f5; color: #333; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-        .chat-container { width: 95%; max-width: 500px; background: #fff; padding: 20px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-        #chat-box { height: 400px; overflow-y: auto; margin-bottom: 15px; padding: 15px; background: #ffffff; border: 1px solid #e0e0e0; border-radius: 15px; display: flex; flex-direction: column; }
-        .input-group { display: flex; gap: 8px; }
-        input { flex: 1; padding: 12px; border-radius: 25px; border: 1px solid #ddd; outline: none; }
-        button { border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-weight: bold; transition: 0.3s; }
-        #send-btn { background: #007bff; color: white; }
-        .voice-btn { background: #28a745; color: white; font-size: 18px; }
-        .bot-msg { color: #1a1a1a; background: #e7f3ff; padding: 10px 15px; border-radius: 15px; align-self: flex-start; margin: 5px 0; max-width: 80%; }
-        .user-msg { color: #fff; background: #007bff; padding: 10px 15px; border-radius: 15px; align-self: flex-end; margin: 5px 0; max-width: 80%; }
+        body { background: #eef2f3; font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        #chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .bot-msg { background: #fff; padding: 15px; border-radius: 18px 18px 18px 2px; align-self: flex-start; max-width: 85%; box-shadow: 0 4px 6px rgba(0,0,0,0.05); color: #222; }
+        .user-msg { background: #007bff; color: #fff; padding: 15px; border-radius: 18px 18px 2px 18px; align-self: flex-end; max-width: 85%; }
+        .controls { background: #fff; padding: 15px; border-top: 1px solid #ddd; }
+        .input-row { display: flex; gap: 10px; align-items: center; }
+        select { padding: 8px; border-radius: 10px; border: 1px solid #ddd; background: #f9f9f9; font-size: 12px; margin-bottom: 10px; width: 100%; }
+        input { flex: 1; border: 1px solid #ddd; border-radius: 25px; padding: 12px 20px; outline: none; }
+        button { border: none; cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; }
+        .call-btn { width: 50px; height: 50px; border-radius: 50%; background: #28a745; color: white; font-size: 24px; }
+        .send-btn { background: #007bff; color: white; border-radius: 25px; padding: 0 20px; height: 45px; }
+        img { width: 100%; border-radius: 12px; margin-top: 10px; }
     </style>
 </head>
 <body>
-    <div class="chat-container">
-        <h2 style="text-align: center; color: #007bff;">Light Man AI 🎤</h2>
-        <div id="chat-box"><div class="bot-msg">أهلاً! دوس على الميكروفون واتكلم، أنا سامعك.</div></div>
-        <div class="input-group">
-            <input type="text" id="user-input" placeholder="اكتب أو اتكلم...">
-            <button class="voice-btn" onclick="startVoice()">🎤</button>
-            <button id="send-btn">إرسال</button>
+    <div id="chat-box"></div>
+    <div class="controls">
+        <select id="voice-select"><option value="">جاري تحميل الأصوات...</option></select>
+        
+        <div class="input-row">
+            <input type="text" id="user-input" placeholder="تحدث مع لايت مان...">
+            <button class="call-btn" id="call-btn" onclick="toggleCall()">📞</button>
+            <button class="send-btn" onclick="send()">إرسال</button>
         </div>
     </div>
 
     <script>
-        const input = document.getElementById('user-input');
         const box = document.getElementById('chat-box');
+        const input = document.getElementById('user-input');
+        const voiceSelect = document.getElementById('voice-select');
+        let isCalling = false;
+        let voices = [];
 
-        // 1. ميزة الميكروفون (تحويل صوتك لكلام)
-        function startVoice() {
-            const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-            recognition.lang = 'ar-SA';
-            recognition.onresult = (event) => {
-                input.value = event.results[0][0].transcript;
-            };
-            recognition.start();
+        // تحميل الأصوات المتاحة في جهازك (موبايل أو كمبيوتر)
+        function loadVoices() {
+            voices = window.speechSynthesis.getVoices();
+            voiceSelect.innerHTML = voices
+                .filter(v => v.lang.includes('ar') || v.lang.includes('en'))
+                .map((v, i) => `<option value="${i}">${v.name} (${v.lang})</option>`).join('');
         }
+        window.speechSynthesis.onvoiceschanged = loadVoices;
 
-        // 2. ميزة نطق الرد (تخلي الروبوت يتكلم بصوته)
-        function speak(text) {
-            const msg = new SpeechSynthesisUtterance(text);
-            msg.lang = 'ar-SA';
-            window.speechSynthesis.speak(msg);
-        }
+        const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'ar-SA';
+        recognition.continuous = true;
 
-        // 3. زرار الإرسال
-        document.getElementById('send-btn').addEventListener('click', async () => {
-            const text = input.value.trim();
-            if (!text) return;
-
-            box.innerHTML += `<div class="user-msg">${text}</div>`;
-            input.value = '';
-            box.scrollTop = box.scrollHeight;
-
-            try {
-                const response = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
-                });
-                const data = await response.json();
-                
-                box.innerHTML += `<div class="bot-msg">${data.reply}</div>`;
-                speak(data.reply); // الروبوت هينطق الرد أول ما يوصل
-                
-            } catch (e) {
-                box.innerHTML += `<div class="bot-msg" style="color:red;">مشكلة في الاتصال!</div>`;
+        function toggleCall() {
+            if (!isCalling) {
+                recognition.start();
+                document.getElementById('call-btn').style.background = 'red';
+                document.getElementById('call-btn').innerText = '⏹';
+                isCalling = true;
+            } else {
+                recognition.stop();
+                document.getElementById('call-btn').style.background = '#28a745';
+                document.getElementById('call-btn').innerText = '📞';
+                isCalling = false;
             }
+        }
+
+        recognition.onresult = (event) => {
+            const text = event.results[event.results.length - 1][0].transcript;
+            input.value = text;
+            send();
+        };
+
+        async function send() {
+            const msg = input.value.trim();
+            if (!msg) return;
+            box.innerHTML += `<div class="user-msg">${msg}</div>`;
+            input.value = '';
+            
+            const response = await fetch('/api/chat', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ message: msg })
+            });
+            const data = await response.json();
+            
+            let htmlReply = `<div class="bot-msg">`;
+            if (data.reply.includes("IMAGE_URL:")) {
+                const parts = data.reply.split("IMAGE_URL:");
+                htmlReply += `<img src="${parts[1].trim()}"><br>` + parts[0];
+            } else {
+                htmlReply += data.reply;
+            }
+            htmlReply += `</div>`;
+            box.innerHTML += htmlReply;
             box.scrollTop = box.scrollHeight;
-        });
+
+            // نطق الرد بالصوت المختار
+            const utterance = new SpeechSynthesisUtterance(data.reply.split("IMAGE_URL:")[0]);
+            if (voices[voiceSelect.value]) utterance.voice = voices[voiceSelect.value];
+            utterance.lang = 'ar-SA';
+            utterance.rate = 0.9; // سرعة هادئة وطبيعية
+            window.speechSynthesis.speak(utterance);
+        }
     </script>
 </body>
 </html>
