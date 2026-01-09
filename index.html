@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Light Man AI</title>
+    <style>
+        body { background-color: #001f3f; color: white; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        .chat-container { width: 90%; max-width: 500px; background: #003366; padding: 20px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        h1 { color: #007bff; }
+        input { width: 100%; padding: 10px; margin-top: 10px; border-radius: 5px; border: none; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; margin-top: 10px; border-radius: 5px; cursor: pointer; width: 100%; }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Light Man AI</h1>
+        <div id="chat-box">أهلاً بك! كيف يمكنني مساعدتك اليوم؟</div>
+        <input type="text" id="user-input" placeholder="اكتب رسالتك هنا...">
+        <button onclick="sendMessage()">إرسال</button>
+    </div>
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('user-input');
+            const box = document.getElementById('chat-box');
+            if(input.value) {
+                box.innerHTML = "جاري التفكير...";
+                setTimeout(() => { box.innerHTML = "أنا معك! تم استلام رسالتك: " + input.value; input.value = ''; }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
