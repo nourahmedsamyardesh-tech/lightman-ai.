@@ -1,18 +1,20 @@
 export default async function handler(req, res) {
   const { message } = req.body;
   try {
-    // استخدام نموذج متقدم يدعم الذكاء المنطقي السريع
-    const aiResponse = await fetch(`https://text.pollinations.ai/${encodeURIComponent(message)}?model=openai&system=أنت لايت مان العبقري. ذكاؤك خارق، تعرف كل الأنميات بالتفصيل. ردودك مصرية عامية ذكية جداً ومختصرة. إذا طلب صورة، أرسل رابط الصورة فقط بعد جملة IMAGE_URL:`);
-    let text = await aiResponse.text();
+    // استخدام نموذج أذكى يدعم البحث والتحليل العميق
+    const aiResponse = await fetch(`https://text.pollinations.ai/${encodeURIComponent(message)}?model=search&system=أنت لايت مان، ذكاء اصطناعي عبقري، تفهم كل شيء بدقة مثل Gemini. ردودك مصرية عامية ذكية جداً. لو طلب صورة، حط الرابط بعد IMAGE_URL:`);
+    const responseText = await aiResponse.text();
 
-    let reply = text.replace(/[#*`_]/g, '');
+    let reply = responseText.replace(/[#*`_]/g, '');
+
+    // ذكاء الصور المطور
     if (message.includes("صورة") || message.includes("ارسم")) {
-      const imgPath = `https://pollinations.ai/p/${encodeURIComponent(message + " cinematic anime style, 8k, detailed")}`;
-      reply = `IMAGE_URL:${imgPath} \n جاري رسم صورتك يا بطل!`;
+      const imgUrl = `https://pollinations.ai/p/${encodeURIComponent(message + " ultra realistic, anime style, 4k")}`;
+      reply = `IMAGE_URL:${imgUrl} \n تفضل هذه الصورة التي طلبتها!`;
     }
 
     return res.status(200).json({ reply });
   } catch (error) {
-    return res.status(200).json({ reply: "دماغي مشغولة شوية، جرب تاني!" });
+    return res.status(200).json({ reply: "عذراً، أحتاج لثانية للتفكير.." });
   }
 }
